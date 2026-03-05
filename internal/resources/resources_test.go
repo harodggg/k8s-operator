@@ -6700,6 +6700,10 @@ func TestBuildConfigMap_ChromiumBrowserConfig(t *testing.T) {
 		t.Errorf("browser.defaultProfile = %v, want %q", browser["defaultProfile"], "default")
 	}
 
+	if browser["attachOnly"] != true {
+			t.Errorf("browser.profiles.%s.attachOnly = %v, want true", name, browser["attachOnly"])
+		}
+
 	profiles, ok := browser["profiles"].(map[string]interface{})
 	if !ok {
 		t.Fatal("expected browser.profiles key")
@@ -6718,9 +6722,6 @@ func TestBuildConfigMap_ChromiumBrowserConfig(t *testing.T) {
 		}
 		if p["color"] != "#4285F4" {
 			t.Errorf("browser.profiles.%s.color = %v, want %q", name, p["color"], "#4285F4")
-		}
-		if p["attachOnly"] != true {
-			t.Errorf("browser.profiles.%s.attachOnly = %v, want true", name, p["attachOnly"])
 		}
 	}
 }
