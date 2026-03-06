@@ -1347,9 +1347,9 @@ var _ = Describe("OpenClawInstance Controller", func() {
 			browser, ok := parsed["browser"].(map[string]interface{})
 			Expect(ok).To(BeTrue(), "config should have browser key")
 
-			attachOnly, ok := browser["attachOnly"].(bool)
+			_, ok := browser["attachOnly"].(bool)
 			Expect(ok).To(BeTrue(), "browser should have attachOnly key")
-			
+
 			profiles, ok := browser["profiles"].(map[string]interface{})
 			Expect(ok).To(BeTrue(), "browser should have profiles key")
 
