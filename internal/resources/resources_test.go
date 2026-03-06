@@ -6744,11 +6744,9 @@ func TestBuildConfigMap_ChromiumUserOverrideAttachOnly(t *testing.T) {
 	}
 
 	browser := parsed["browser"].(map[string]interface{})
-	profiles := browser["profiles"].(map[string]interface{})
-	defaultProfile := profiles["default"].(map[string]interface{})
-
-	if defaultProfile["attachOnly"] != false {
-		t.Errorf("user-set attachOnly should be preserved, got %v", defaultProfile["attachOnly"])
+	attachOnly := browser["attachOnly"].(bool)
+	if attachOnly != false {
+		t.Errorf("user-set attachOnly should be preserved, got %v", attachOnly)
 	}
 }
 
