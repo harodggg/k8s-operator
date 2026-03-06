@@ -6701,8 +6701,8 @@ func TestBuildConfigMap_ChromiumBrowserConfig(t *testing.T) {
 	}
 
 	if browser["attachOnly"] != true {
-			t.Errorf("browser.attachOnly = %v, want true",browser["attachOnly"])
-		}
+		t.Errorf("browser.attachOnly = %v, want true", browser["attachOnly"])
+	}
 
 	profiles, ok := browser["profiles"].(map[string]interface{})
 	if !ok {
