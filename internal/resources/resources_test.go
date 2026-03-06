@@ -6731,7 +6731,7 @@ func TestBuildConfigMap_ChromiumUserOverrideAttachOnly(t *testing.T) {
 	instance.Spec.Chromium.Enabled = true
 	instance.Spec.Config.Raw = &openclawv1alpha1.RawConfig{
 		RawExtension: runtime.RawExtension{
-			Raw: []byte(`{"browser":{"profiles":{"default":{"attachOnly":false}}}}`),
+			Raw: []byte(`{"browser":{"attachOnly":false}}`),
 		},
 	}
 
