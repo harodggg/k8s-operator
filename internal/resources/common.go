@@ -17,8 +17,9 @@ limitations under the License.
 package resources
 
 import (
-	openclawv1alpha1 "github.com/openclawrocks/k8s-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/resource"
+
+	openclawv1alpha1 "github.com/openclawrocks/k8s-operator/api/v1alpha1"
 )
 
 const (
@@ -274,7 +275,7 @@ func Ptr[T any](v T) *T {
 
 // ParseQuantity parses a string into a resource.Quantity, falling back to
 // the default if parsing fails. Prevents panics from resource.MustParse.
-func ParseQuantity(s string, defaultValue string) resource.Quantity {
+func ParseQuantity(s, defaultValue string) resource.Quantity {
 	if s == "" {
 		return resource.MustParse(defaultValue)
 	}
