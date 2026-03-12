@@ -764,6 +764,20 @@ func (r *OpenClawInstanceReconciler) reconcilePVC(ctx context.Context, instance 
 		return nil
 	}
 
+	// When HPA is enabled, VolumeClaimTemplates on the StatefulSet handle
+	// per-replica PVCs - skip creating the standalone PVC.
+	if resources.IsHPAEnabled(instance) {
+		instance.Status.ManagedResources.PVC = ""
+		meta.SetStatusCondition(&instance.Status.Conditions, metav1.Condition{
+			Type:               openclawv1alpha1.ConditionTypeStorageReady,
+			Status:             metav1.ConditionTrue,
+			Reason:             "VolumeClaimTemplates",
+			Message:            "Per-replica PVCs managed by StatefulSet VolumeClaimTemplates",
+			ObservedGeneration: instance.Generation,
+		})
+		return nil
+	}
+
 	// Check if using existing claim
 	if instance.Spec.Storage.Persistence.ExistingClaim != "" {
 		existing := &corev1.PersistentVolumeClaim{}

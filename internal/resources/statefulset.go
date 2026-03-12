@@ -95,6 +95,35 @@ func BuildStatefulSet(instance *openclawv1alpha1.OpenClawInstance, gatewayTokenS
 		instance.Spec.Image.PullSecrets...,
 	)
 
+	// When persistence is enabled with HPA (multi-replica), use VolumeClaimTemplates
+	// so each replica gets its own PVC instead of sharing a single static PVC.
+	persistenceEnabled := instance.Spec.Storage.Persistence.Enabled == nil || *instance.Spec.Storage.Persistence.Enabled
+	if persistenceEnabled && IsHPAEnabled(instance) {
+		size := ParseQuantity(instance.Spec.Storage.Persistence.Size, "10Gi")
+		accessModes := instance.Spec.Storage.Persistence.AccessModes
+		if len(accessModes) == 0 {
+			accessModes = []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce}
+		}
+		vct := corev1.PersistentVolumeClaim{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   "data",
+				Labels: labels,
+			},
+			Spec: corev1.PersistentVolumeClaimSpec{
+				AccessModes: accessModes,
+				Resources: corev1.VolumeResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceStorage: size,
+					},
+				},
+			},
+		}
+		if instance.Spec.Storage.Persistence.StorageClass != nil {
+			vct.Spec.StorageClassName = instance.Spec.Storage.Persistence.StorageClass
+		}
+		sts.Spec.VolumeClaimTemplates = []corev1.PersistentVolumeClaim{vct}
+	}
+
 	return sts
 }
 
@@ -1753,7 +1782,11 @@ func buildVolumes(instance *openclawv1alpha1.OpenClawInstance, skillPacks *Resol
 
 	// Data volume (PVC or emptyDir)
 	persistenceEnabled := instance.Spec.Storage.Persistence.Enabled == nil || *instance.Spec.Storage.Persistence.Enabled
-	if persistenceEnabled {
+	switch {
+	case persistenceEnabled && IsHPAEnabled(instance):
+		// VolumeClaimTemplates handle per-replica PVCs - the StatefulSet
+		// controller auto-creates a volume named "data" for each pod.
+	case persistenceEnabled:
 		pvcName := PVCName(instance)
 		if instance.Spec.Storage.Persistence.ExistingClaim != "" {
 			pvcName = instance.Spec.Storage.Persistence.ExistingClaim
@@ -1766,7 +1799,7 @@ func buildVolumes(instance *openclawv1alpha1.OpenClawInstance, skillPacks *Resol
 				},
 			},
 		})
-	} else {
+	default:
 		volumes = append(volumes, corev1.Volume{
 			Name: "data",
 			VolumeSource: corev1.VolumeSource{
