@@ -873,7 +873,12 @@ spec:
 
 When enabled, the operator creates a `HorizontalPodAutoscaler` targeting the StatefulSet and sets the StatefulSet's replica count to nil so the HPA manages scaling. The HPA is deleted when auto-scaling is disabled.
 
-When auto-scaling is combined with persistent storage, the operator uses StatefulSet `VolumeClaimTemplates` instead of a single shared PVC. Each replica gets its own PVC (named `data-<instance>-<ordinal>`), ensuring pods don't contend for the same volume. The VCT-created PVCs use the same `size`, `storageClass`, and `accessModes` settings from `spec.storage.persistence`. The PVC retention policy is set to `Retain` for both scale-down and deletion, so data is preserved. If auto-scaling is later disabled, the per-replica PVCs become orphaned and must be cleaned up manually.
+When auto-scaling is combined with persistent storage:
+
+- Each replica gets its own PVC via StatefulSet `VolumeClaimTemplates` (named `data-<instance>-<ordinal>`)
+- PVCs inherit `size`, `storageClass`, and `accessModes` from `spec.storage.persistence`
+- Retention policy is `Retain` for both scale-down and deletion -- data is preserved
+- If auto-scaling is later disabled, per-replica PVCs become orphaned and must be cleaned up manually
 
 ### Topology Spread Constraints
 
