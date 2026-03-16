@@ -81,6 +81,7 @@ func BuildStatefulSet(instance *openclawv1alpha1.OpenClawInstance, gatewayTokenS
 					Tolerations:                   instance.Spec.Availability.Tolerations,
 					Affinity:                      instance.Spec.Availability.Affinity,
 					TopologySpreadConstraints:     instance.Spec.Availability.TopologySpreadConstraints,
+					RuntimeClassName:              instance.Spec.Availability.RuntimeClassName,
 					RestartPolicy:                 corev1.RestartPolicyAlways,
 					DNSPolicy:                     corev1.DNSClusterFirst,
 					SchedulerName:                 corev1.DefaultSchedulerName,

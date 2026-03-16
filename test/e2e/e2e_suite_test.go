@@ -526,6 +526,48 @@ var _ = Describe("OpenClawInstance Controller", func() {
 
 			Expect(k8sClient.Delete(ctx, instance)).Should(Succeed())
 		})
+
+		It("Should apply runtimeClassName", func() {
+			instanceName := "rtc-instance"
+
+			if os.Getenv("E2E_SKIP_RESOURCE_VALIDATION") == "true" {
+				Skip("Skipping resource validation in minimal mode")
+			}
+
+			instance := &openclawv1alpha1.OpenClawInstance{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      instanceName,
+					Namespace: namespace,
+					Annotations: map[string]string{
+						"openclaw.rocks/skip-backup": "true",
+					},
+				},
+				Spec: openclawv1alpha1.OpenClawInstanceSpec{
+					Image: openclawv1alpha1.ImageSpec{
+						Repository: "ghcr.io/openclaw/openclaw",
+						Tag:        "latest",
+					},
+					Availability: openclawv1alpha1.AvailabilitySpec{
+						RuntimeClassName: resources.Ptr("kata-fc"),
+					},
+				},
+			}
+
+			Expect(k8sClient.Create(ctx, instance)).Should(Succeed())
+
+			statefulSet := &appsv1.StatefulSet{}
+			Eventually(func() error {
+				return k8sClient.Get(ctx, types.NamespacedName{
+					Name:      instanceName,
+					Namespace: namespace,
+				}, statefulSet)
+			}, timeout, interval).Should(Succeed())
+
+			Expect(statefulSet.Spec.Template.Spec.RuntimeClassName).ToNot(BeNil())
+			Expect(*statefulSet.Spec.Template.Spec.RuntimeClassName).To(Equal("kata-fc"))
+
+			Expect(k8sClient.Delete(ctx, instance)).Should(Succeed())
+		})
 	})
 
 	Context("When deleting an OpenClawInstance without S3 backup credentials", func() {

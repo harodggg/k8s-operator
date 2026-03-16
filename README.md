@@ -899,6 +899,18 @@ spec:
             app.kubernetes.io/instance: my-instance
 ```
 
+### Runtime Class
+
+Schedule pods on alternative container runtimes (Kata Containers, gVisor, etc.) for VM-level isolation or security hardening:
+
+```yaml
+spec:
+  availability:
+    runtimeClassName: kata-fc
+```
+
+A matching `RuntimeClass` resource must exist in the cluster. If unset, the default container runtime is used.
+
 ### Pod Annotations
 
 Merge extra annotations into the StatefulSet pod template. Operator-managed keys (`openclaw.rocks/config-hash`, `openclaw.rocks/secret-hash`) always take precedence and cannot be overridden.

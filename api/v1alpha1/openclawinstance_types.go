@@ -1126,6 +1126,14 @@ type AvailabilitySpec struct {
 	// TopologySpreadConstraints describes how pods should spread across topology domains
 	// +optional
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
+
+	// RuntimeClassName refers to a RuntimeClass object in the cluster,
+	// which should be used to run this pod.
+	// If no RuntimeClass resource matches the named class, the pod will not be run.
+	// If unset or empty, the default container runtime is used.
+	// More info: https://kubernetes.io/docs/concepts/containers/runtime-class/
+	// +optional
+	RuntimeClassName *string `json:"runtimeClassName,omitempty"`
 }
 
 // AutoScalingSpec configures horizontal pod auto-scaling via HPA

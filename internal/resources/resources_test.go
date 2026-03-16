@@ -1268,6 +1268,32 @@ func TestBuildStatefulSet_TopologySpreadConstraints_Empty(t *testing.T) {
 	}
 }
 
+func TestBuildStatefulSet_RuntimeClassName(t *testing.T) {
+	instance := newTestInstance("rtc-test")
+	instance.Spec.Availability.RuntimeClassName = Ptr("kata-fc")
+
+	sts := BuildStatefulSet(instance, "", nil)
+	podSpec := sts.Spec.Template.Spec
+
+	if podSpec.RuntimeClassName == nil {
+		t.Fatal("expected RuntimeClassName to be set")
+	}
+	if *podSpec.RuntimeClassName != "kata-fc" {
+		t.Errorf("RuntimeClassName = %q, want %q", *podSpec.RuntimeClassName, "kata-fc")
+	}
+}
+
+func TestBuildStatefulSet_RuntimeClassName_Unset(t *testing.T) {
+	instance := newTestInstance("rtc-unset")
+
+	sts := BuildStatefulSet(instance, "", nil)
+	podSpec := sts.Spec.Template.Spec
+
+	if podSpec.RuntimeClassName != nil {
+		t.Errorf("expected nil RuntimeClassName, got %q", *podSpec.RuntimeClassName)
+	}
+}
+
 func TestBuildStatefulSet_PodAnnotations_UserAnnotationsPresent(t *testing.T) {
 	instance := newTestInstance("pod-ann-test")
 	instance.Spec.PodAnnotations = map[string]string{
@@ -10357,6 +10383,9 @@ func TestBuildStatefulSet_NilAvailability(t *testing.T) {
 	}
 	if podSpec.TopologySpreadConstraints != nil {
 		t.Error("expected nil TopologySpreadConstraints")
+	}
+	if podSpec.RuntimeClassName != nil {
+		t.Error("expected nil RuntimeClassName")
 	}
 }
 
